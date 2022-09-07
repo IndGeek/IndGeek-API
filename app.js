@@ -1,57 +1,40 @@
-const fs = require("fs");
-const Parser = require("rss-parser");
+const express = require("express");
 
-(async function main() {
+const app = express();
 
-    // Make a new RSS Parser
-    const parser = new Parser();
+app.use(express.json());
 
-    // Get all the items in the RSS feed
-    const feed = await parser.parseURL("https://turbohosty.com/feed/"); // https://www.reddit.com/.rss
 
-    let items = [];
+let Parser = require("rss-parser");
+let parser = new Parser();
+let Arr = [];
 
-    // Clean up the string and replace reserved characters
-    const fileName = `${feed.title.replace(/\s+/g, "-").replace(/[/\\?%*:|"<>]/g, '').toLowerCase()}.json`;
+(async () => {
+    let feed = await parser.parseURL("https://indgeek.com/feed");
+    //   console.log(feed);
 
-    if (fs.existsSync(fileName)) {
-        items = require(`./${fileName}`);
-    }
-
-    // Add the items to the items array
-    await Promise.all(feed.items.map(async (currentItem) => {
-
-        // Add a new item if it doesn't already exist
-        if (items.filter((item) => isEquivalent(item, currentItem)).length <= 0) {
-            items.push(currentItem);
-        }
-
-    }));
-
-    // Save the file
-    fs.writeFileSync(fileName, JSON.stringify(items));
-
+    feed.items.forEach(item => {
+        // console.log(item.title + ':' + item.link)
+        let tempSnippet = item.contentSnippet.split(" ").slice(0, -2).join(" ");
+        Arr.push(
+            item.title,
+            item.creator,
+            item.pubDate,
+            item.link,
+            item.categories,
+            tempSnippet
+        );
+    });
+console.log(Arr);
 })();
 
-function isEquivalent(a, b) {
-    // Create arrays of property names
-    let aProps = Object.getOwnPropertyNames(a);
-    let bProps = Object.getOwnPropertyNames(b);
 
-    // if number of properties is different, objects are not equivalent
-    if (aProps.length != bProps.length) {
-        return false;
-    }
+app.get('/', (req, res)=>{
+    res.json(Arr)
+})
 
-    for (let i = 0; i < aProps.length; i++) {
-        let propName = aProps[i];
+const PORT = process.env.PORT || 3000;
 
-        // if values of same property are not equal, objects are not equivalent
-        if (a[propName] !== b[propName]) {
-            return false;
-        }
-    }
-
-    // if we made it this far, objects are considered equivalent
-    return true;
-}
+app.listen(PORT, () => {
+    console.log(`server started at PORT ${PORT}`);
+});
