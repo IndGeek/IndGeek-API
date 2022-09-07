@@ -15,16 +15,38 @@ let Arr = [];
 
     feed.items.forEach(item => {
         // console.log(item.title + ':' + item.link)
+        let title = item.title;
+        let creator = item.creator;
+        let pubDate = item.pubDate
+        let link = item.link
+        let categories = item.categories
         let tempSnippet = item.contentSnippet.split(" ").slice(0, -2).join(" ");
-        Arr.push(
-            item.title,
-            item.creator,
-            item.pubDate,
-            item.link,
-            item.categories,
-            tempSnippet
-        );
+        
+        // Arr.push(
+        //     title,
+        //     creator,
+        //     pubDate,
+        //     link,
+        //     categories,
+        //     tempSnippet
+        // );
+
+        tempObj = {
+            "title" : title,
+            "creator": creator,
+            "pubdate": pubDate,
+            "link": link,
+            "categories": categories,
+            "tempsnippet": tempSnippet
+        }
+
+        Arr = [
+            ...Arr,
+            tempObj
+        ];
     });
+
+
 console.log(Arr);
 })();
 
